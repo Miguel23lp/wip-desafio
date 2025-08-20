@@ -118,3 +118,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+.SidebarNavMenuLink {
+  @apply flex-row rounded-none items-center;
+  &:hover {
+    @apply text-red-400;
+  }
+  &[data-active]{
+    @apply text-red-700 border-l-4 border-red-700;
+  }
+  
+}

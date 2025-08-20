@@ -1,14 +1,9 @@
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import {
     NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuIndicator,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-    NavigationMenuTrigger,
-    NavigationMenuViewport,
-    navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu"
 
 export interface NavBarItem { 
@@ -19,13 +14,15 @@ export interface NavBarItem {
 }
 
 export default function NavBar({ items }: { items: NavBarItem[] }) {
+    let location = useLocation();
+
     return (
         <>
             <NavigationMenu>
                 <NavigationMenuList className="flex-col">
                     {items.map((item, i) => (
                         <NavigationMenuItem key={i} className="self-start">
-                            <NavigationMenuLink asChild className="flex-row rounded-none items-center">
+                            <NavigationMenuLink active={location.pathname===item.to} asChild className="SidebarNavMenuLink">
                                 <NavLink to={item.to}>
                                     {item.icon}
                                     <span className="ml-2 text-lg font-semibold">{item.label}</span>
