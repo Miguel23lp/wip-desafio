@@ -112,20 +112,21 @@ const FormSchema = z.object({
     packsPerBox: z.string().optional(),
     coefficientPerBox: z.coerce.number().optional().default(0),
     brandId: z.string().nonempty("Por favor insira a Marca."),
-    size: z.string().optional(),
+    size: z.coerce.number().positive(),
     description: z.string().optional(),
     customerRef: z.string().optional(),
     csStyleRef: z.string().optional(),
     customerBarcode: z.string().optional(),
-    weight: z.coerce.number().optional(),
-    boxWeight: z.coerce.number().optional(),
-    measures1: z.coerce.number().optional(),
-    measures2: z.coerce.number().optional(),
-    measures3: z.coerce.number().optional(),
+    weight: z.coerce.number().positive().optional(),
+    boxWeight: z.coerce.number().positive().optional(),
+    measures1: z.coerce.number().positive().optional(),
+    measures2: z.coerce.number().positive().optional(),
+    measures3: z.coerce.number().positive().optional(),
     unitId: z.string().optional(),
-    price: z.coerce.number().optional(),
+    price: z.coerce.number().positive().optional(),
     currencyId: z.string().optional(),
-    sustainableCompId: z.coerce.number().int().optional()
+    sustainableCompId: z.coerce.number().int().optional(),
+    code: z.string().optional(),
 })
 
 export default function CreateArticlesPage() {
@@ -149,6 +150,23 @@ export default function CreateArticlesPage() {
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         console.log("Dados: ", data);
+    }
+
+    function createCode() {
+        let code = [
+            form.getValues("kind"),
+            form.getValues("nPairs").toString().padStart(3, '0'),
+            form.getValues("customerId"),
+            form.getValues("brandId"),
+            form.getValues("colorId"),
+            form.getValues("size")?.toString().padStart(3, '0'),
+            form.getValues("certificationId"),
+        ].join("");
+
+
+        form.setValue("code", code);
+
+        console.log("Generated Code: ", code);
     }
 
     return (
@@ -177,7 +195,7 @@ export default function CreateArticlesPage() {
                         )}
                     />
 
-                    <div className={kind == "PK" ? "contents" : "hidden"}>
+                    <div className={kind == "PK" ? "contents relative" : "hidden"}>
                         <p>{"> Packs de Meias / Packs Assortment Socks >"}</p>
                         <div className="flex justify-between ">
                             {/* Lado esquerdo */}
@@ -461,7 +479,7 @@ export default function CreateArticlesPage() {
                                             name="measures2"
                                             render={({ field }) => (
                                                 <FormItem className="flex">
-                                                    
+
                                                     <FormLabel>x</FormLabel>
                                                     <FormControl className="w-16">
                                                         <Input
@@ -478,7 +496,7 @@ export default function CreateArticlesPage() {
                                             name="measures3"
                                             render={({ field }) => (
                                                 <FormItem className="flex">
-                                                    
+
                                                     <FormLabel>x</FormLabel>
                                                     <FormControl className="w-16">
                                                         <Input
@@ -572,6 +590,33 @@ export default function CreateArticlesPage() {
                         </div>
 
 
+                        <div className="self-end">
+                            <FormField
+                                control={form.control}
+                                name="code"
+                                render={({ field }) => (
+                                    <FormItem className="flex">
+                                        <FormLabel>Código Gerado / New Code Created</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                readOnly
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            type="button"
+                                            onClick={() => {
+                                                if (form.formState.isValid) {
+                                                    createCode()
+                                                }
+                                            }}
+                                        >
+                                            Verificar/Verify
+                                        </Button>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
 
 
