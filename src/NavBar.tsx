@@ -25,7 +25,7 @@ export default function NavBar({ items }: { items: NavBarItem[] }) {
                             <NavigationMenuLink active={location.pathname===item.to} asChild className="SidebarNavMenuLink">
                                 <NavLink to={item.to}>
                                     {item.icon}
-                                    <span className="ml-2 text-lg font-semibold">{item.label}</span>
+                                    <span className="ml-2 text-2xl font-semibold">{item.label}</span>
                                 </NavLink>
                             </NavigationMenuLink>
                         </NavigationMenuItem>

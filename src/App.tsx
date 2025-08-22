@@ -8,31 +8,31 @@ function App() {
 
   const primaryNavBarItems: NavBarItem[] = [
     {
-      icon: <LayoutDashboard className="text-lg" />,
+      icon: <LayoutDashboard style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Create Articles",
       to: "/CreateArticles",
       element: <CreateArticlesPage/>
     },
     {
-      icon: <ListTree className="text-lg" />,
+      icon: <ListTree style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Backlog",
       to: "/Backlog",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
     },
     {
-      icon: <Compass className="text-lg" />,
+      icon: <Compass style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Roadmap",
       to: "/Roadmap",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
     },
     {
-      icon: <ChartColumnIncreasing className="text-lg" />,
+      icon: <ChartColumnIncreasing style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Reports",
       to: "/Reports",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
     },
     {
-      icon: <Truck className="text-lg" />,
+      icon: <Truck style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Releases",
       to: "/Releases",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
@@ -42,13 +42,13 @@ function App() {
 
   const secundaryNavBarItems: NavBarItem[] = [
     {
-      icon: <Users className="text-lg" />,
+      icon: <Users style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Teams",
       to: "/Teams",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
     },
     {
-      icon: <Settings className="text-lg" />,
+      icon: <Settings style={{ width: '1.5rem', height: '1.5rem' }} />,
       label: "Project Settings",
       to: "/ProjectSettings",
       element: <h1 className="text-2xl font-bold">Ainda não implementado</h1>
