@@ -21,14 +21,16 @@ export default function SearchableDropdownWithId({ options, field, form, label }
                             !field.value && "text-muted-foreground"
                         )}
                     >
-                        {options.find(option => option.id === field.value)?.value || `Insira o ${label}...`}
+                        {options.find(option => option.id === field.value)?.value || `Insira ${label}...`}
                         <ChevronDown className="opacity-50" />
                     </Button>
                 </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-50 p-0">
                 <Command>
-                    <CommandInput placeholder={`Pesquisar ${label}...`} />
+                    <CommandInput 
+                        className={options.length === 0 ? "hidden" : ""}
+                        placeholder={`Pesquisar ${label}...`} />
                     <CommandList>
                         <CommandEmpty>{ `Nenhum ${label} encontrado.`}</CommandEmpty>
                         <CommandGroup>

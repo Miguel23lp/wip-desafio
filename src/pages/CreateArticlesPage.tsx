@@ -18,6 +18,7 @@ import { Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import SearchableDropdown from "@/SearchableDropdown"
 import SearchableDropdownWithId from "@/SearchableDropdownWithId"
+import { Textarea } from "@/components/ui/textarea"
 
 let kinds: string[] = [
     "PM",
@@ -116,14 +117,15 @@ const FormSchema = z.object({
     customerRef: z.string().optional(),
     csStyleRef: z.string().optional(),
     customerBarcode: z.string().optional(),
-    wheight: z.coerce.number().optional(),
+    weight: z.coerce.number().optional(),
+    boxWeight: z.coerce.number().optional(),
     measures1: z.coerce.number().optional(),
     measures2: z.coerce.number().optional(),
     measures3: z.coerce.number().optional(),
     unitId: z.string().optional(),
     price: z.coerce.number().optional(),
     currencyId: z.string().optional(),
-    sustainableComp: z.coerce.number().int().optional()
+    sustainableCompId: z.coerce.number().int().optional()
 })
 
 export default function CreateArticlesPage() {
@@ -145,134 +147,222 @@ export default function CreateArticlesPage() {
         name: "brandId",
     })
 
-    const nPairs = useWatch({
-        control: form.control,
-        name: "nPairs",
-    })
-
-    const coefficientPerBox = useWatch({
-        control: form.control,
-        name: "coefficientPerBox",
-    })
-
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log("You submitted the following values: ", data);
+        console.log("Dados: ", data);
     }
 
     return (
         <Form {...form} >
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-5 pt-10 flex flex-col gap-3">
-                <hr />
-                <p>Criação, Registo e Verificação de Códigos de Artigos / Article Codes Creation, Verification and Registration</p>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full h-full">
 
-                <FormField
-                    control={form.control}
-                    name="kind"
-                    render={({ field }) => (
-                        <FormItem className="flex">
-                            <FormLabel>Tipo / Kind</FormLabel>
-                            <SearchableDropdown
-                                options={kinds}
-                                field={field}
-                                form={form}
-                                label="tipo"
-                            />
-                        </FormItem>
-                    )}
-                />
+                {/*Cima / Conteudo principal*/}
+                <div className="p-5 pt-16 flex flex-col gap-4 h-full">
 
-                <div className={kind == "PK" ? "contents" : "hidden"}>
-                    <p>{"> Packs de Meias / Packs Assortment Socks >"}</p>
-                    <div className="flex justify-between ">
-                        {/* Lado esquerdo */}
-                        <div className="flex flex-col gap-3 flex-1">
-                            <FormField
-                                control={form.control}
-                                name="nPairs"
-                                render={({ field }) => (
-                                    <FormItem className="">
-                                        <FormLabel>Nº Pares / Nr. Pairs</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                className="w-50"
-                                                type="number"
-                                                step={1}
-                                                min={1}
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                    <hr />
+                    <p>Criação, Registo e Verificação de Códigos de Artigos / Article Codes Creation, Verification and Registration</p>
 
-                            <FormField
-                                control={form.control}
-                                name="customerId"
-                                render={({ field }) => (
-                                    <FormItem className="">
-                                        <FormLabel>Cliente / Customer</FormLabel>
-                                        <SearchableDropdownWithId
-                                            options={mapIds(customers)}
-                                            field={field}
-                                            form={form}
-                                            label="cliente"
-                                        />
-                                    </FormItem>
-                                )}
-                            />
+                    <FormField
+                        control={form.control}
+                        name="kind"
+                        render={({ field }) => (
+                            <FormItem className="flex">
+                                <FormLabel>Tipo / Kind</FormLabel>
+                                <SearchableDropdown
+                                    options={kinds}
+                                    field={field}
+                                    form={form}
+                                    label="tipo"
+                                />
+                            </FormItem>
+                        )}
+                    />
 
-                            <FormField
-                                disabled={!brandId}
-                                control={form.control}
-                                name="colorId"
-                                render={({ field }) => (
-                                    <FormItem className="flex">
-                                        <FormLabel>Cor - Sortimento / Color - Assortment</FormLabel>
-                                        <SearchableDropdownWithId
-                                            options={mapIds(colorsPerBrand[brandId] || [])}
-                                            field={field}
-                                            form={form}
-                                            label="cor"
-                                        />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="certificationId"
-                                render={({ field }) => (
-                                    <FormItem className="flex">
-                                        <FormLabel>Certificação / Certification</FormLabel>
-                                        <SearchableDropdownWithId
-                                            options={mapIds(certifications)}
-                                            field={field}
-                                            form={form}
-                                            label="certificação"
-                                        />
-                                    </FormItem>
-                                )}
-                            />
-
-                        </div>
-                        {/* Lado direito */}
-                        <div className="flex flex-col gap-3 flex-1">
-                            <div className="flex gap-1">
+                    <div className={kind == "PK" ? "contents" : "hidden"}>
+                        <p>{"> Packs de Meias / Packs Assortment Socks >"}</p>
+                        <div className="flex justify-between ">
+                            {/* Lado esquerdo */}
+                            <div className="flex flex-col gap-4 flex-1">
+                                <FormField
+                                    control={form.control}
+                                    name="nPairs"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Nº Pares / Nr. Pairs</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    className="w-50"
+                                                    type="number"
+                                                    step={1}
+                                                    min={1}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
                                 <FormField
                                     control={form.control}
-                                    name="packsPerBox"
+                                    name="customerId"
                                     render={({ field }) => (
                                         <FormItem className="flex">
-                                            <FormLabel>Packs p/Cx. / Packs per Box</FormLabel>
+                                            <FormLabel>Cliente / Customer</FormLabel>
+                                            <SearchableDropdownWithId
+                                                options={mapIds(customers)}
+                                                field={field}
+                                                form={form}
+                                                label="cliente"
+                                            />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    disabled={!brandId}
+                                    control={form.control}
+                                    name="colorId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Cor - Sortimento / Color - Assortment</FormLabel>
+                                            <SearchableDropdownWithId
+                                                options={mapIds(colorsPerBrand[brandId] || [])}
+                                                field={field}
+                                                form={form}
+                                                label="cor"
+                                            />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="certificationId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Certificação / Certification</FormLabel>
+                                            <SearchableDropdownWithId
+                                                options={mapIds(certifications)}
+                                                field={field}
+                                                form={form}
+                                                label="certificação"
+                                            />
+                                        </FormItem>
+                                    )}
+                                />
+
+                            </div>
+                            {/* Lado direito */}
+                            <div className="flex flex-col gap-4 flex-1">
+                                <div className="flex gap-3">
+
+                                    <FormField
+                                        control={form.control}
+                                        name="packsPerBox"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel>Packs p/Cx. / Packs per Box</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="w-15"
+                                                        type="number"
+                                                        step={1}
+                                                        min={0}
+                                                        defaultValue={0}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="coefficientPerBox"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel>Coeficiente p/Cx. / Coefficient per Box</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="w-50"
+                                                        type="number"
+                                                        min={0}
+                                                        defaultValue={0}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <FormField
+                                    disabled={!customerId}
+                                    control={form.control}
+                                    name="brandId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Marca / Brand</FormLabel>
+                                            <SearchableDropdownWithId
+                                                options={mapIds(brandsPerCustomer[customerId] || [])}
+                                                field={field}
+                                                form={form}
+                                                label="marca"
+                                            />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="size"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Tamanho / Size</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="w-15"
+                                                    className="w-50"
                                                     type="number"
                                                     step={1}
-                                                    min={0}
-                                                    defaultValue={0}
+                                                    min={1}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                            </div>
+
+                        </div>
+
+                        <hr />
+
+                        <div className="flex justify-between ">
+                            <div className="flex flex-col gap-4 w-[40%]">
+
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel className="self-start mt-3">Descrição / Description</FormLabel>
+                                            <Textarea
+                                                className="resize-none h-40"
+                                                {...field}
+                                            />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="customerRef"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Ref. do Cliente / Customer Ref.</FormLabel>
+                                            <FormControl>
+                                                <Input
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -282,69 +372,217 @@ export default function CreateArticlesPage() {
 
                                 <FormField
                                     control={form.control}
-                                    name="coefficientPerBox"
+                                    name="csStyleRef"
                                     render={({ field }) => (
                                         <FormItem className="flex">
-                                            <FormLabel>Coeficiente p/Cx. / Coefficient per Box</FormLabel>
+                                            <FormLabel>CS Style Ref.</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="w-50"
-                                                    type="number"
-                                                    min={0}
-                                                    defaultValue={0}
                                                     {...field}
                                                 />
                                             </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div className="flex gap-3">
+                                    <FormField
+                                        control={form.control}
+                                        name="customerBarcode"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel>Customer Barcode EAN13</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="weight"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel>Peso / Weight - PK</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">GR</FormLabel>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <FormField
+                                        control={form.control}
+                                        name="boxWeight"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel>Peso Cx/ Box Weight</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">Kg</FormLabel>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <div className="flex gap-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="measures1"
+                                            render={({ field }) => (
+                                                <FormItem className="flex">
+                                                    <FormLabel>Medidas Cx / Box Measures</FormLabel>
+                                                    <FormControl className="w-16">
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="measures2"
+                                            render={({ field }) => (
+                                                <FormItem className="flex">
+                                                    
+                                                    <FormLabel>x</FormLabel>
+                                                    <FormControl className="w-16">
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="measures3"
+                                            render={({ field }) => (
+                                                <FormItem className="flex">
+                                                    
+                                                    <FormLabel>x</FormLabel>
+                                                    <FormControl className="w-16">
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">cm</FormLabel>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex gap-4">
+
+                                    <FormField
+                                        control={form.control}
+                                        name="unitId"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel className="self-start mt-3">Unidade / Unit</FormLabel>
+                                                <SearchableDropdownWithId
+
+                                                    options={mapIds(units || [])}
+                                                    field={field}
+                                                    form={form}
+                                                    label="Unidade"
+                                                />
+                                            </FormItem>
+                                        )}
+                                    />
+
+
+                                    <FormField
+                                        control={form.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel className="self-start mt-3">Preço Un / Un Price</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="w-24"
+                                                        type="number"
+                                                        min={0}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="currencyId"
+                                        render={({ field }) => (
+                                            <FormItem className="flex">
+                                                <FormLabel className="self-start mt-3">Moeda / Currency</FormLabel>
+                                                <SearchableDropdownWithId
+                                                    options={mapIds(currencies || [])}
+                                                    field={field}
+                                                    form={form}
+                                                    label="Moeda"
+                                                />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                </div>
+
+                                <FormField
+                                    control={form.control}
+                                    name="sustainableCompId"
+                                    render={({ field }) => (
+                                        <FormItem className="flex">
+                                            <FormLabel>Sustainable Comp.</FormLabel>
+                                            <SearchableDropdownWithId
+                                                options={mapIds(sustainableComps || [])}
+                                                field={field}
+                                                form={form}
+                                                label="Sustainable Comp."
+                                            />
                                         </FormItem>
                                     )}
                                 />
                             </div>
 
-                            <FormField
-                                disabled={!customerId}
-                                control={form.control}
-                                name="brandId"
-                                render={({ field }) => (
-                                    <FormItem className="flex">
-                                        <FormLabel>Marca / Brand</FormLabel>
-                                        <SearchableDropdownWithId
-                                            options={mapIds(brandsPerCustomer[customerId] || [])}
-                                            field={field}
-                                            form={form}
-                                            label="marca"
-                                        />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="size"
-                                render={({ field }) => (
-                                    <FormItem className="flex">
-                                        <FormLabel>Tamanho / Size</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                className="w-50"
-                                                type="number"
-                                                step={1}
-                                                min={1}
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-
                         </div>
 
+
                     </div>
+
+
                 </div>
 
-                <Button type="submit" className="w-50 self-end mt-5">
-                    Gravar
-                </Button>
-
+                {/*Baixo*/}
+                <div className="flex absolute bottom-0 left-0 right-0 bg-gray-200 border-t border-gray-300 flex-col gap-3">
+                    <Button type="submit" className="self-end w-50 m-5">
+                        Gravar
+                    </Button>
+                </div>
             </form>
         </Form>
 
