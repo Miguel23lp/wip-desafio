@@ -10,90 +10,14 @@ import {
 } from "@/components/ui/form"
 import { z } from "zod"
 import { useForm, useWatch } from "react-hook-form"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 import SearchableDropdown from "@/SearchableDropdown"
 import SearchableDropdownWithId from "@/SearchableDropdownWithId"
 import { Textarea } from "@/components/ui/textarea"
-
-let kinds: string[] = [
-    "PM",
-    "PK",
-    "AC",
-    "KS"
-]
-
-const customers: { [key: string]: string }[] = [
-    { "001": "WIP" },
-    { "025": "IPCA" }
-]
-
-const certifications: { [key: string]: string }[] = [
-    { "001": "GOTS" },
-    { "002": "BLUE" },
-    { "003": "GREEN" }
-]
-
-const units: { [key: string]: string }[] = [
-    { "001": "UN" },
-    { "002": "PK" },
-    { "003": "PAIR" }
-]
-
-const currencies: { [key: string]: string }[] = [
-    { "001": "EUR" },
-    { "002": "USD" },
-    { "003": "JPY" },
-    { "004": "GBP" }
-]
-
-const sustainableComps: { [key: string]: string }[] = [
-    { "001": "ECO" },
-    { "002": "WOOL" },
-    { "003": "GRTXT" },
-]
-
-const brandsPerCustomer: { [key: string]: { [key: string]: string }[] } = {
-    "001": [
-        { "001": "WIPTech Pro" },
-        { "253": "WIPTech Ultra" },
-        { "563": "WIPTech Standard" },
-    ],
-    "025": [
-        { "009": "IPCA 1" },
-        { "632": "IPCA 2" },
-    ]
-}
-
-const colorsPerBrand: { [key: string]: { [key: string]: string }[] } = {
-    "001": [
-        { "002": "Pure Red" },
-        { "006": "Soft White" },
-        { "009": "Sunset Orange" },
-    ],
-    "253": [
-        { "025": "Pure Red" },
-        { "085": "Soft White" },
-    ],
-    "563": [
-        { "001": "Black" },
-        { "002": "White" },
-    ],
-    "009": [
-        { "001": "Green" },
-        { "002": "White" },
-    ],
-    "632": [
-        { "001": "Green" },
-        { "002": "White" },
-    ]
-
-}
-
+import axios from "axios"
+import { useEffect, useState } from "react"
 
 const mapIds = (arr: { [key: string]: string }[]) => {
     return arr.map(item => {
@@ -105,14 +29,14 @@ const mapIds = (arr: { [key: string]: string }[]) => {
 
 const FormSchema = z.object({
     kind: z.string().nonempty("Por favor selecione o Tipo"),
-    nPairs: z.coerce.number().int().min(1, "Por favor insira o número de pares").max(99, "Número máximo de pares é 99"),
+    nPairs: z.coerce.number().int().min(1).max(99),
     customerId: z.string().nonempty("Por favor insira o Cliente."),
     colorId: z.string().nonempty("Por favor insira a Cor."),
     certificationId: z.string().nonempty("Por favor insira a Certificação."),
-    packsPerBox: z.string().optional(),
-    coefficientPerBox: z.coerce.number().optional().default(0),
+    packsPerBox: z.coerce.number().optional(),
+    coefficientPerBox: z.coerce.number().optional(),
     brandId: z.string().nonempty("Por favor insira a Marca."),
-    size: z.coerce.number().positive(),
+    size: z.coerce.number().int().min(1).max(99),
     description: z.string().optional(),
     customerRef: z.string().optional(),
     csStyleRef: z.string().optional(),
@@ -134,11 +58,10 @@ export default function CreateArticlesPage() {
         resolver: zodResolver(FormSchema),
     })
 
-
     const kind = useWatch({
         control: form.control,
         name: "kind",
-    })
+    },)
     const customerId = useWatch({
         control: form.control,
         name: "customerId",
@@ -148,8 +71,83 @@ export default function CreateArticlesPage() {
         name: "brandId",
     })
 
+    const [kinds, setKinds] = useState<string[]>([]);
+    const [customers, setCustomers] = useState<{ id: string, value: string }[]>([]);
+    const [certifications, setCertifications] = useState<{ id: string, value: string }[]>([]);
+    const [units, setUnits] = useState<{ id: string, value: string }[]>([]);
+    const [currencies, setCurrencies] = useState<{ id: string, value: string }[]>([]);
+    const [sustComps, setSustComps] = useState<{ id: string, value: string }[]>([]);
+    const [brands, setBrands] = useState<{ id: string, value: string }[]>([]);
+    const [colors, setColors] = useState<{ id: string, value: string }[]>([]);
+
+    useEffect(() => {
+        axios.get("/kinds").then(function (response) {
+            console.log("/kinds", response.data);
+            if (!response.data.success) return;
+            setKinds(response.data.data);
+        });
+    }, []);
+
+    useEffect(() => {
+        form.resetField("customerId");
+        form.resetField("certificationId");
+        form.resetField("unitId");
+        form.resetField("currencyId");
+        form.resetField("sustainableCompId");
+        setCustomers([]);
+        setCertifications([]);
+        setUnits([]);
+        setCurrencies([]);
+        setSustComps([]);
+
+        if (!kind) return;
+
+        axios.get(`/create/${kind}`).then(function (response) {
+            console.log(`/create/${kind}`, response.data);
+            if (!response.data.success) return;
+            setCustomers(mapIds(response.data.customer));
+            setCertifications(mapIds(response.data.certification));
+            setUnits(mapIds(response.data.unit));
+            setCurrencies(mapIds(response.data.currency));
+            setSustComps(mapIds(response.data.sustComp));
+        });
+    }, [kind]);
+
+    useEffect(() => {
+        form.resetField("brandId");
+        setBrands([]);
+        form.resetField("colorId");
+        setColors([]);
+        if (!customerId) return;
+        axios.get(`/customer/${customerId}/brands`).then(function (response) {
+            console.log(`/customer/${customerId}/brands`, response.data);
+            if (!response.data.success) return;
+            setBrands(mapIds(response.data.data));
+        });
+    }, [customerId]);
+
+    useEffect(() => {
+        form.resetField("colorId");
+        setColors([]);
+        if (!brandId) return;
+        axios.get(`/brand/${brandId}/colors`).then(function (response) {
+            console.log(`/brand/${brandId}/colors`, response.data);
+            if (!response.data.success) return;
+            setColors(mapIds(response.data.data));
+        });
+    }, [brandId]);
+
     function onSubmit(data: z.infer<typeof FormSchema>) {
+
+        toast.message("Submeteu os seguintes dados:", {
+            description: (
+                <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
+                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+                </pre>
+            ),
+        })
         console.log("Dados: ", data);
+        form.reset();
     }
 
     function createCode() {
@@ -159,7 +157,7 @@ export default function CreateArticlesPage() {
             form.getValues("customerId"),
             form.getValues("brandId"),
             form.getValues("colorId"),
-            form.getValues("size")?.toString().padStart(3, '0'),
+            form.getValues("size").toString().padStart(3, '0'),
             form.getValues("certificationId"),
         ].join("");
 
@@ -227,7 +225,7 @@ export default function CreateArticlesPage() {
                                         <FormItem className="flex">
                                             <FormLabel>Cliente / Customer</FormLabel>
                                             <SearchableDropdownWithId
-                                                options={mapIds(customers)}
+                                                options={customers}
                                                 field={field}
                                                 form={form}
                                                 label="cliente"
@@ -244,7 +242,7 @@ export default function CreateArticlesPage() {
                                         <FormItem className="flex">
                                             <FormLabel>Cor - Sortimento / Color - Assortment</FormLabel>
                                             <SearchableDropdownWithId
-                                                options={mapIds(colorsPerBrand[brandId] || [])}
+                                                options={colors}
                                                 field={field}
                                                 form={form}
                                                 label="cor"
@@ -260,7 +258,7 @@ export default function CreateArticlesPage() {
                                         <FormItem className="flex">
                                             <FormLabel>Certificação / Certification</FormLabel>
                                             <SearchableDropdownWithId
-                                                options={mapIds(certifications)}
+                                                options={certifications}
                                                 field={field}
                                                 form={form}
                                                 label="certificação"
@@ -286,7 +284,6 @@ export default function CreateArticlesPage() {
                                                         type="number"
                                                         step={1}
                                                         min={0}
-                                                        defaultValue={0}
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -305,7 +302,6 @@ export default function CreateArticlesPage() {
                                                         className="w-50"
                                                         type="number"
                                                         min={0}
-                                                        defaultValue={0}
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -322,7 +318,7 @@ export default function CreateArticlesPage() {
                                         <FormItem className="flex">
                                             <FormLabel>Marca / Brand</FormLabel>
                                             <SearchableDropdownWithId
-                                                options={mapIds(brandsPerCustomer[customerId] || [])}
+                                                options={brands}
                                                 field={field}
                                                 form={form}
                                                 label="marca"
@@ -524,7 +520,7 @@ export default function CreateArticlesPage() {
                                                 <FormLabel className="self-start mt-3">Unidade / Unit</FormLabel>
                                                 <SearchableDropdownWithId
 
-                                                    options={mapIds(units || [])}
+                                                    options={units}
                                                     field={field}
                                                     form={form}
                                                     label="Unidade"
@@ -559,7 +555,7 @@ export default function CreateArticlesPage() {
                                             <FormItem className="flex">
                                                 <FormLabel className="self-start mt-3">Moeda / Currency</FormLabel>
                                                 <SearchableDropdownWithId
-                                                    options={mapIds(currencies || [])}
+                                                    options={currencies}
                                                     field={field}
                                                     form={form}
                                                     label="Moeda"
@@ -577,7 +573,7 @@ export default function CreateArticlesPage() {
                                         <FormItem className="flex">
                                             <FormLabel>Sustainable Comp.</FormLabel>
                                             <SearchableDropdownWithId
-                                                options={mapIds(sustainableComps || [])}
+                                                options={sustComps}
                                                 field={field}
                                                 form={form}
                                                 label="Sustainable Comp."
@@ -599,6 +595,7 @@ export default function CreateArticlesPage() {
                                         <FormLabel>Código Gerado / New Code Created</FormLabel>
                                         <FormControl>
                                             <Input
+                                                className="w-50"
                                                 readOnly
                                                 {...field}
                                             />
@@ -609,9 +606,12 @@ export default function CreateArticlesPage() {
                                                 if (form.formState.isValid) {
                                                     createCode()
                                                 }
+                                                else {
+                                                    form.trigger();
+                                                }
                                             }}
                                         >
-                                            Verificar/Verify
+                                            Verificar / Verify
                                         </Button>
                                     </FormItem>
                                 )}
